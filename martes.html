@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolarOptima - Calculadora Profesional de Paneles Solares</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
+    <style>
+        /* Estilos CSS permanecen iguales */
+        :root {
+            --primary: #2c7873;
+            --secondary: #6fb98f;
+            --accent: #ff9a3c;
+            --light: #f3f7f7;
+            --dark: #2d3436;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --danger: #F44336;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: var(--light);
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            color: var(--accent);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        nav a:hover, nav a.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+        
+        .hero {
+            background: url('https://images.unsplash.com/photo-1509391366360-2e959784a276?ixlib=rb-4.0.3') center/cover;
+            padding: 4rem 0;
+            position: relative;
+            color: white;
+            text-align: center;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--accent);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background-color: #e68a36;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid white;
+            margin-left: 1rem;
+        }
+        
+        .btn-outline:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        section {
+            padding: 3rem 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary);
+        }
+        
+        .section-title h2 {
+            font-size: 2rem;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+        
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--accent);
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            color: var(--primary);
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .calculator-panel {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .calculator-panel h3 {
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .calculator-panel h3 i {
+            color: var(--accent);
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(44, 120, 115, 0.2);
+        }
+        
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .range-container input[type="range"] {
+            flex: 1;
+        }
+        
+        .range-value {
+            min-width: 50px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .results-panel {
+            background-color: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .result-card {
+            padding: 1.5rem;
+            border-radius: 8px;
+            background-color: var(--light);
+        }
+        
+        .result-card h4 {
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+            font-size: 1rem;
+        }
+        
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .result-positive {
+            color: var(--success);
+        }
+        
+        .result-negative {
+            color: var(--danger);
+        }
+        
+        .result-neutral {
+            color: var(--warning);
+        }
+        
+        .chart-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-container h3 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .chart-wrapper {
+            width: 100%;
+            height: 400px;
+            position: relative;
+        }
+        
+        .info-section {
+            background-color: var(--primary);
+            color: white;
+            padding: 3rem 0;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .info-card {
+            background-color: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            background-color: rgba(255,255,255,0.2);
+        }
+        
+        .info-card i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+        
+        .info-card h3 {
+            margin-bottom: 1rem;
+        }
+        
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 3rem 0 1.5rem;
+        }
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-col h3 {
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+        
+        .footer-col ul {
+            list-style: none;
+        }
+        
+        .footer-col ul li {
+            margin-bottom: 0.8rem;
+        }
+        
+        .footer-col a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-col a:hover {
+            color: var(--accent);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--accent);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .btn {
+                display: block;
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+            
+            .btn-outline {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-solar-panel"></i>
+                <span>SolarOptima</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#calculadora" class="active">Calculadora</a></li>
+                    <li><a href="#como-funciona">Cómo funciona</a></li>
+                    <li><a href="#beneficios">Beneficios</a></li>
+                    <li><a href="#contacto">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Calcula tu sistema de energía solar ideal</h1>
+            <p>Descubre cuántos paneles solares necesitas para tu hogar y comienza a ahorrar en tu factura eléctrica desde el primer día.</p>
+            <a href="#calculadora" class="btn">Usar calculadora</a>
+            <a href="#como-funciona" class="btn btn-outline">Aprender más</a>
+        </div>
+    </section>
+    
+    <section id="calculadora">
+        <div class="container">
+            <div class="section-title">
+                <h2>Calculadora Solar</h2>
+                <p>Ingresa los datos de tu hogar para obtener una estimación personalizada</p>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="residencial">Residencial</button>
+                <button class="tab-btn" data-tab="comercial">Comercial</button>
+                <button class="tab-btn" data-tab="industrial">Industrial</button>
+            </div>
+            
+            <div class="tab-content active" id="residencial">
+                <div class="calculator-grid">
+                    <div class="calculator-panel">
+                        <h3><i class="fas fa-home"></i> Ubicación y Consumo</h3>
+                        <div class="form-group">
+                            <label for="city">Ciudad</label>
+                            <select id="city" class="form-control">
+                                <option value="morelia">Morelia</option>
+                                <option value="cdmx">Ciudad de México</option>
+                                <option value="monterrey">Monterrey</option>
+                                <option value="guadalajara">Guadalajara</option>
+                                <option value="merida">Mérida</option>
+                                <option value="tijuana">Tijuana</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="month">Mes de análisis</label>
+                            <select id="month" class="form-control">
+                                <option value="1">Enero</option>
+                                <option value="2">Febrero</option>
+                                <option value="3">Marzo</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Mayo</option>
+                                <option value="6">Junio</option>
+                                <option value="7" selected>Julio</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="consumption">Consumo eléctrico diario (kWh)</label>
+                            <input type="number" id="consumption" class="form-control" value="5" step="0.1" min="1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="variability">Variabilidad del consumo (%)</label>
+                            <div class="range-container">
+                                <input type="range" id="variability" min="0" max="100" value="20" class="form-control">
+                                <span class="range-value" id="variability-value">20%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="calculator-panel">
+                        <h3><i class="fas fa-solar-panel"></i> Configuración del Panel</h3>
+                        <div class="form-group">
+                            <label for="panelPower">Potencia del panel (kW)</label>
+                            <input type="number" id="panelPower" class="form-control" value="0.3" step="0.05" min="0.1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="panelEfficiency">Eficiencia del panel (%)</label>
+                            <div class="range-container">
+                                <input type="range" id="panelEfficiency" min="10" max="30" value="18" class="form-control">
+                                <span class="range-value" id="efficiency-value">18%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="panelCount">Número de paneles</label>
+                            <input type="number" id="panelCount" class="form-control" value="5" min="1" max="50">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confidence">Nivel de confianza deseado (%)</label>
+                            <div class="range-container">
+                                <input type="range" id="confidence" min="50" max="100" value="95" class="form-control">
+                                <span class="range-value" id="confidence-value">95%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="calculator-panel">
+                        <h3><i class="fas fa-battery-three-quarters"></i> Almacenamiento</h3>
+                        <div class="form-group">
+                            <label for="batteryCapacity">Capacidad de batería (kWh)</label>
+                            <input type="number" id="batteryCapacity" class="form-control" value="0" min="0" step="1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="batteryEfficiency">Eficiencia de la batería (%)</label>
+                            <div class="range-container">
+                                <input type="range" id="batteryEfficiency" min="50" max="100" value="90" class="form-control">
+                                <span class="range-value" id="battery-efficiency-value">90%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="batteryMinLevel">Nivel mínimo de reserva (%)</label>
+                            <div class="range-container">
+                                <input type="range" id="batteryMinLevel" min="0" max="50" value="20" class="form-control">
+                                <span class="range-value" id="battery-min-value">20%</span>
+                            </div>
+                        </div>
+                        
+                        <button id="calculate-btn" class="btn" style="width: 100%; margin-top: 1.5rem;">
+                            <i class="fas fa-calculator"></i> Calcular Sistema
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="results-panel" id="results-panel" style="display: none;">
+                    <h3 style="margin-bottom: 1.5rem; color: var(--primary);">
+                        <i class="fas fa-chart-line"></i> Resultados para <span id="result-location">Morelia, Julio</span>
+                    </h3>
+                    
+                    <div class="results-grid" id="results-grid">
+                        <!-- Los resultados se llenarán dinámicamente con JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3><i class="fas fa-sun"></i> Radiación Solar Diaria</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="solarRadiationChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3><i class="fas fa-bolt"></i> Consumo vs Generación</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="consumptionChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3><i class="fas fa-dollar-sign"></i> Optimización de Costos</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                    <p id="costText" style="margin-top: 1rem;"></p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="comercial">
+                <div style="text-align: center; padding: 2rem;">
+                    <h3 style="color: var(--primary); margin-bottom: 1rem;">Calculadora Comercial</h3>
+                    <p>Próximamente: Estamos desarrollando una herramienta especializada para negocios y comercios.</p>
+                    <p>Mientras tanto, puedes usar la calculadora residencial para obtener una estimación básica.</p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="industrial">
+                <div style="text-align: center; padding: 2rem;">
+                    <h3 style="color: var(--primary); margin-bottom: 1rem;">Calculadora Industrial</h3>
+                    <p>Próximamente: Estamos desarrollando una herramienta especializada para aplicaciones industriales.</p>
+                    <p>Contáctanos para un análisis personalizado de tus necesidades energéticas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="info-section" id="como-funciona">
+        <div class="container">
+            <div class="section-title" style="color: white;">
+                <h2>Cómo Funciona Nuestra Calculadora</h2>
+                <p>Metodología científica para resultados precisos</p>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <i class="fas fa-cloud-sun"></i>
+                    <h3>Datos de Radiación Solar</h3>
+                    <p>Utilizamos datos históricos de radiación solar para tu ubicación específica, considerando variaciones estacionales y patrones climáticos.</p>
+                </div>
+                
+                <div class="info-card">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>Modelado Probabilístico</h3>
+                    <p>Nuestro algoritmo considera la variabilidad natural del consumo energético y la generación solar para ofrecer resultados con distintos niveles de confianza.</p>
+                </div>
+                
+                <div class="info-card">
+                    <i class="fas fa-cogs"></i>
+                    <h3>Factores Técnicos</h3>
+                    <p>Incluimos eficiencia de paneles, pérdidas por sombreado, temperatura, orientación e inclinación en nuestros cálculos.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="beneficios">
+        <div class="container">
+            <div class="section-title">
+                <h2>Beneficios de la Energía Solar</h2>
+                <p>Por qué deberías considerar instalar paneles solares</p>
+            </div>
+            
+            <div class="info-grid">
+                <div class="calculator-panel">
+                    <h3><i class="fas fa-money-bill-wave"></i> Ahorro Económico</h3>
+                    <p>Reduce tu factura eléctrica hasta en un 95% desde el primer mes, con un retorno de inversión típico de 3-5 años.</p>
+                </div>
+                
+                <div class="calculator-panel">
+                    <h3><i class="fas fa-leaf"></i> Sostenibilidad</h3>
+                    <p>Cada kW generado con energía solar evita la emisión de aproximadamente 1.5 kg de CO2 al día.</p>
+                </div>
+                
+                <div class="calculator-panel">
+                    <h3><i class="fas fa-bolt"></i> Independencia Energética</h3>
+                    <p>Protege tu hogar o negocio contra aumentos en las tarifas eléctricas y cortes de energía.</p>
+                </div>
+                
+                <div class="calculator-panel">
+                    <h3><i class="fas fa-home"></i> Valor de Propiedad</h3>
+                    <p>Las propiedades con sistemas solares instalados tienen un valor de reventa hasta un 4% mayor.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="contacto" class="info-section">
+        <div class="container">
+            <div class="section-title" style="color: white;">
+                <h2>Contacto</h2>
+                <p>¿Tienes preguntas? Estamos aquí para ayudarte</p>
+            </div>
+            
+            <div class="calculator-grid">
+                <div class="calculator-panel">
+                    <h3><i class="fas fa-envelope"></i> Información de Contacto</h3>
+                    <p><i class="fas fa-phone"></i> +52 55 1234 5678</p>
+                    <p><i class="fas fa-envelope"></i> info@solaroptima.com</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Av. Solar 123, Ciudad de México</p>
+                    
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="calculator-panel">
+                    <h3><i class="fas fa-paper-plane"></i> Envíanos un Mensaje</h3>
+                    <form id="contact-form">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" class="form-control" placeholder="Correo electrónico" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" class="form-control" placeholder="Teléfono">
+                        </div>
+                        <div class="form-group">
+                            <textarea class="form-control" rows="4" placeholder="Mensaje" required></textarea>
+                        </div>
+                        <button type="submit" class="btn">Enviar Mensaje</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>SolarOptima</h3>
+                    <p>La solución inteligente para tu transición a energía solar. Calcula, compara y toma decisiones informadas.</p>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Enlaces Rápidos</h3>
+                    <ul>
+                        <li><a href="#calculadora">Calculadora Solar</a></li>
+                        <li><a href="#como-funciona">Cómo Funciona</a></li>
+                        <li><a href="#beneficios">Beneficios</a></li>
+                        <li><a href="#contacto">Contacto</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Recursos</h3>
+                    <ul>
+                        <li><a href="#">Guía de Energía Solar</a></li>
+                        <li><a href="#">Preguntas Frecuentes</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Glosario</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#">Términos y Condiciones</a></li>
+                        <li><a href="#">Política de Privacidad</a></li>
+                        <li><a href="#">Aviso Legal</a></li>
+                        <li><a href="#">Cookies</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 SolarOptima. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Datos simulados más completos
+        const solarData = {
+            morelia: {
+                1: [4.2, 4.3, 4.5, 4.1, 4.0, 4.4, 4.6, 4.3, 4.2, 4.5, 4.7, 4.4, 4.1, 4.3, 4.6, 4.8, 4.5, 4.3, 4.2, 4.4, 4.7, 4.5, 4.2, 4.0, 4.3, 4.6, 4.4, 4.2, 4.5, 4.3, 4.1],
+                2: [4.8, 5.0, 4.7, 4.5, 4.9, 5.2, 5.0, 4.8, 4.6, 4.9, 5.1, 4.9, 4.6, 4.8, 5.1, 5.3, 5.0, 4.8, 4.7, 4.9, 5.2, 5.0, 4.7, 4.5, 4.8, 5.1, 4.9, 4.7],
+                3: [5.5, 5.7, 5.3, 5.1, 5.6, 5.9, 5.7, 5.4, 5.2, 5.5, 5.8, 5.6, 5.2, 5.5, 5.8, 6.0, 5.7, 5.5, 5.3, 5.6, 5.9, 5.6, 5.3, 5.1, 5.4, 5.7, 5.5, 5.3, 5.6, 5.4, 5.2],
+                4: [6.1, 6.3, 5.9, 5.7, 6.2, 6.5, 6.3, 6.0, 5.8, 6.1, 6.4, 6.2, 5.8, 6.1, 6.4, 6.6, 6.3, 6.1, 5.9, 6.2, 6.5, 6.2, 5.9, 5.7, 6.0, 6.3, 6.1, 5.9, 6.2, 6.0],
+                5: [6.5, 6.7, 6.3, 6.1, 6.6, 6.9, 6.7, 6.4, 6.2, 6.5, 6.8, 6.6, 6.2, 6.5, 6.8, 7.0, 6.7, 6.5, 6.3, 6.6, 6.9, 6.6, 6.3, 6.1, 6.4, 6.7, 6.5, 6.3, 6.6, 6.4, 6.2],
+                6: [6.8, 7.0, 6.6, 6.4, 6.9, 7.2, 7.0, 6.7, 6.5, 6.8, 7.1, 6.9, 6.5, 6.8, 7.1, 7.3, 7.0, 6.8, 6.6, 6.9, 7.2, 6.9, 6.6, 6.4, 6.7, 7.0, 6.8, 6.6, 6.9, 6.7],
+                7: [6.5, 6.7, 6.3, 6.1, 6.6, 6.9, 6.7, 6.4, 6.2, 6.5, 6.8, 6.6, 6.2, 6.5, 6.8, 7.0, 6.7, 6.5, 6.3, 6.6, 6.9, 6.6, 6.3, 6.1, 6.4, 6.7, 6.5, 6.3, 6.6, 6.4, 6.2],
+                8: [6.2, 6.4, 6.0, 5.8, 6.3, 6.6, 6.4, 6.1, 5.9, 6.2, 6.5, 6.3, 5.9, 6.2, 6.5, 6.7, 6.4, 6.2, 6.0, 6.3, 6.6, 6.3, 6.0, 5.8, 6.1, 6.4, 6.2, 6.0, 6.3, 6.1, 5.9],
+                9: [5.8, 6.0, 5.6, 5.4, 5.9, 6.2, 6.0, 5.7, 5.5, 5.8, 6.1, 5.9, 5.5, 5.8, 6.1, 6.3, 6.0, 5.8, 5.6, 5.9, 6.2, 5.9, 5.6, 5.4, 5.7, 6.0, 5.8, 5.6, 5.9, 5.7],
+                10: [5.2, 5.4, 5.0, 4.8, 5.3, 5.6, 5.4, 5.1, 4.9, 5.2, 5.5, 5.3, 4.9, 5.2, 5.5, 5.7, 5.4, 5.2, 5.0, 5.3, 5.6, 5.3, 5.0, 4.8, 5.1, 5.4, 5.2, 5.0, 5.3, 5.1, 4.9],
+                11: [4.7, 4.9, 4.5, 4.3, 4.8, 5.1, 4.9, 4.6, 4.4, 4.7, 5.0, 4.8, 4.4, 4.7, 5.0, 5.2, 4.9, 4.7, 4.5, 4.8, 5.1, 4.8, 4.5, 4.3, 4.6, 4.9, 4.7, 4.5, 4.8, 4.6],
+                12: [4.3, 4.5, 4.1, 3.9, 4.4, 4.7, 4.5, 4.2, 4.0, 4.3, 4.6, 4.4, 4.0, 4.3, 4.6, 4.8, 4.5, 4.3, 4.1, 4.4, 4.7, 4.4, 4.1, 3.9, 4.2, 4.5, 4.3, 4.1, 4.4, 4.2, 4.0]
+            },
+            cdmx: {
+                1: [4.0, 4.1, 4.3, 3.9, 3.8, 4.2, 4.4, 4.1, 4.0, 4.3, 4.5, 4.2, 3.9, 4.1, 4.4, 4.6, 4.3, 4.1, 4.0, 4.2, 4.5, 4.3, 4.0, 3.8, 4.1, 4.4, 4.2, 4.0, 4.3, 4.1, 3.9],
+                2: [4.6, 4.8, 4.5, 4.3, 4.7, 5.0, 4.8, 4.6, 4.4, 4.7, 4.9, 4.7, 4.4, 4.6, 4.9, 5.1, 4.8, 4.6, 4.5, 4.7, 5.0, 4.8, 4.5, 4.3, 4.6, 4.9, 4.7, 4.5],
+                3: [5.3, 5.5, 5.1, 4.9, 5.4, 5.7, 5.5, 5.2, 5.0, 5.3, 5.6, 5.4, 5.0, 5.3, 5.6, 5.8, 5.5, 5.3, 5.1, 5.4, 5.7, 5.4, 5.1, 4.9, 5.2, 5.5, 5.3, 5.1, 5.4, 5.2, 5.0],
+                4: [5.9, 6.1, 5.7, 5.5, 6.0, 6.3, 6.1, 5.8, 5.6, 5.9, 6.2, 6.0, 5.6, 5.9, 6.2, 6.4, 6.1, 5.9, 5.7, 6.0, 6.3, 6.0, 5.7, 5.5, 5.8, 6.1, 5.9, 5.7, 6.0, 5.8],
+                5: [6.3, 6.5, 6.1, 5.9, 6.4, 6.7, 6.5, 6.2, 6.0, 6.3, 6.6, 6.4, 6.0, 6.3, 6.6, 6.8, 6.5, 6.3, 6.1, 6.4, 6.7, 6.4, 6.1, 5.9, 6.2, 6.5, 6.3, 6.1, 6.4, 6.2, 6.0],
+                6: [6.6, 6.8, 6.4, 6.2, 6.7, 7.0, 6.8, 6.5, 6.3, 6.6, 6.9, 6.7, 6.3, 6.6, 6.9, 7.1, 6.8, 6.6, 6.4, 6.7, 7.0, 6.7, 6.4, 6.2, 6.5, 6.8, 6.6, 6.4, 6.7, 6.5],
+                7: [6.3, 6.5, 6.1, 5.9, 6.4, 6.7, 6.5, 6.2, 6.0, 6.3, 6.6, 6.4, 6.0, 6.3, 6.6, 6.8, 6.5, 6.3, 6.1, 6.4, 6.7, 6.4, 6.1, 5.9, 6.2, 6.5, 6.3, 6.1, 6.4, 6.2, 6.0],
+                8: [6.0, 6.2, 5.8, 5.6, 6.1, 6.4, 6.2, 5.9, 5.7, 6.0, 6.3, 6.1, 5.7, 6.0, 6.3, 6.5, 6.2, 6.0, 5.8, 6.1, 6.4, 6.1, 5.8, 5.6, 5.9, 6.2, 6.0, 5.8, 6.1, 5.9, 5.7],
+                9: [5.6, 5.8, 5.4, 5.2, 5.7, 6.0, 5.8, 5.5, 5.3, 5.6, 5.9, 5.7, 5.3, 5.6, 5.9, 6.1, 5.8, 5.6, 5.4, 5.7, 6.0, 5.7, 5.4, 5.2, 5.5, 5.8, 5.6, 5.4, 5.7, 5.5],
+                10: [5.0, 5.2, 4.8, 4.6, 5.1, 5.4, 5.2, 4.9, 4.7, 5.0, 5.3, 5.1, 4.7, 5.0, 5.3, 5.5, 5.2, 5.0, 4.8, 5.1, 5.4, 5.1, 4.8, 4.6, 4.9, 5.2, 5.0, 4.8, 5.1, 4.9, 4.7],
+                11: [4.5, 4.7, 4.3, 4.1, 4.6, 4.9, 4.7, 4.4, 4.2, 4.5, 4.8, 4.6, 4.2, 4.5, 4.8, 5.0, 4.7, 4.5, 4.3, 4.6, 4.9, 4.6, 4.3, 4.1, 4.4, 4.7, 4.5, 4.3, 4.6, 4.4],
+                12: [4.1, 4.3, 3.9, 3.7, 4.2, 4.5, 4.3, 4.0, 3.8, 4.1, 4.4, 4.2, 3.8, 4.1, 4.4, 4.6, 4.3, 4.1, 3.9, 4.2, 4.5, 4.2, 3.9, 3.7, 4.0, 4.3, 4.1, 3.9, 4.2, 4.0, 3.8]
+            },
+            monterrey: {
+                1: [4.5, 4.6, 4.8, 4.4, 4.3, 4.7, 4.9, 4.6, 4.5, 4.8, 5.0, 4.7, 4.4, 4.6, 4.9, 5.1, 4.8, 4.6, 4.5, 4.7, 5.0, 4.8, 4.5, 4.3, 4.6, 4.9, 4.7, 4.5, 4.8, 4.6, 4.4],
+                2: [5.1, 5.3, 5.0, 4.8, 5.2, 5.5, 5.3, 5.1, 4.9, 5.2, 5.4, 5.2, 4.9, 5.1, 5.4, 5.6, 5.3, 5.1, 5.0, 5.2, 5.5, 5.3, 5.0, 4.8, 5.1, 5.4, 5.2, 5.0],
+                3: [5.8, 6.0, 5.6, 5.4, 5.9, 6.2, 6.0, 5.7, 5.5, 5.8, 6.1, 5.9, 5.5, 5.8, 6.1, 6.3, 6.0, 5.8, 5.6, 5.9, 6.2, 5.9, 5.6, 5.4, 5.7, 6.0, 5.8, 5.6, 5.9, 5.7, 5.5],
+                4: [6.4, 6.6, 6.2, 6.0, 6.5, 6.8, 6.6, 6.3, 6.1, 6.4, 6.7, 6.5, 6.1, 6.4, 6.7, 6.9, 6.6, 6.4, 6.2, 6.5, 6.8, 6.5, 6.2, 6.0, 6.3, 6.6, 6.4, 6.2, 6.5, 6.3],
+                5: [6.8, 7.0, 6.6, 6.4, 6.9, 7.2, 7.0, 6.7, 6.5, 6.8, 7.1, 6.9, 6.5, 6.8, 7.1, 7.3, 7.0, 6.8, 6.6, 6.9, 7.2, 6.9, 6.6, 6.4, 6.7, 7.0, 6.8, 6.6, 6.9, 6.7, 6.5],
+                6: [7.1, 7.3, 6.9, 6.7, 7.2, 7.5, 7.3, 7.0, 6.8, 7.1, 7.4, 7.2, 6.8, 7.1, 7.4, 7.6, 7.3, 7.1, 6.9, 7.2, 7.5, 7.2, 6.9, 6.7, 7.0, 7.3, 7.1, 6.9, 7.2, 7.0],
+                7: [6.8, 7.0, 6.6, 6.4, 6.9, 7.2, 7.0, 6.7, 6.5, 6.8, 7.1, 6.9, 6.5, 6.8, 7.1, 7.3, 7.0, 6.8, 6.6, 6.9, 7.2, 6.9, 6.6, 6.4, 6.7, 7.0, 6.8, 6.6, 6.9, 6.7, 6.5],
+                8: [6.5, 6.7, 6.3, 6.1, 6.6, 6.9, 6.7, 6.4, 6.2, 6.5, 6.8, 6.6, 6.2, 6.5, 6.8, 7.0, 6.7, 6.5, 6.3, 6.6, 6.9, 6.6, 6.3, 6.1, 6.4, 6.7, 6.5, 6.3, 6.6, 6.4, 6.2],
+                9: [6.1, 6.3, 5.9, 5.7, 6.2, 6.5, 6.3, 6.0, 5.8, 6.1, 6.4, 6.2, 5.8, 6.1, 6.4, 6.6, 6.3, 6.1, 5.9, 6.2, 6.5, 6.2, 5.9, 5.7, 6.0, 6.3, 6.1, 5.9, 6.2, 6.0],
+                10: [5.5, 5.7, 5.3, 5.1, 5.6, 5.9, 5.7, 5.4, 5.2, 5.5, 5.8, 5.6, 5.2, 5.5, 5.8, 6.0, 5.7, 5.5, 5.3, 5.6, 5.9, 5.6, 5.3, 5.1, 5.4, 5.7, 5.5, 5.3, 5.6, 5.4, 5.2],
+                11: [5.0, 5.2, 4.8, 4.6, 5.1, 5.4, 5.2, 4.9, 4.7, 5.0, 5.3, 5.1, 4.7, 5.0, 5.3, 5.5, 5.2, 5.0, 4.8, 5.1, 5.4, 5.1, 4.8, 4.6, 4.9, 5.2, 5.0, 4.8, 5.1, 4.9],
+                12: [4.6, 4.8, 4.4, 4.2, 4.7, 5.0, 4.8, 4.5, 4.3, 4.6, 4.9, 4.7, 4.3, 4.6, 4.9, 5.1, 4.8, 4.6, 4.4, 4.7, 5.0, 4.7, 4.4, 4.2, 4.5, 4.8, 4.6, 4.4, 4.7, 4.5, 4.3]
+            },
+            guadalajara: {
+                1: [4.3, 4.4, 4.6, 4.2, 4.1, 4.5, 4.7, 4.4, 4.3, 4.6, 4.8, 4.5, 4.2, 4.4, 4.7, 4.9, 4.6, 4.4, 4.3, 4.5, 4.8, 4.6, 4.3, 4.1, 4.4, 4.7, 4.5, 4.3, 4.6, 4.4, 4.2],
+                2: [4.9, 5.1, 4.8, 4.6, 5.0, 5.3, 5.1, 4.9, 4.7, 5.0, 5.2, 5.0, 4.7, 4.9, 5.2, 5.4, 5.1, 4.9, 4.8, 5.0, 5.3, 5.1, 4.8, 4.6, 4.9, 5.2, 5.0, 4.8],
+                3: [5.6, 5.8, 5.4, 5.2, 5.7, 6.0, 5.8, 5.5, 5.3, 5.6, 5.9, 5.7, 5.3, 5.6, 5.9, 6.1, 5.8, 5.6, 5.4, 5.7, 6.0, 5.7, 5.4, 5.2, 5.5, 5.8, 5.6, 5.4, 5.7, 5.5, 5.3],
+                4: [6.2, 6.4, 6.0, 5.8, 6.3, 6.6, 6.4, 6.1, 5.9, 6.2, 6.5, 6.3, 5.9, 6.2, 6.5, 6.7, 6.4, 6.2, 6.0, 6.3, 6.6, 6.3, 6.0, 5.8, 6.1, 6.4, 6.2, 6.0, 6.3, 6.1],
+                5: [6.6, 6.8, 6.4, 6.2, 6.7, 7.0, 6.8, 6.5, 6.3, 6.6, 6.9, 6.7, 6.3, 6.6, 6.9, 7.1, 6.8, 6.6, 6.4, 6.7, 7.0, 6.7, 6.4, 6.2, 6.5, 6.8, 6.6, 6.4, 6.7, 6.5, 6.3],
+                6: [6.9, 7.1, 6.7, 6.5, 7.0, 7.3, 7.1, 6.8, 6.6, 6.9, 7.2, 7.0, 6.6, 6.9, 7.2, 7.4, 7.1, 6.9, 6.7, 7.0, 7.3, 7.0, 6.7, 6.5, 6.8, 7.1, 6.9, 6.7, 7.0, 6.8],
+                7: [6.6, 6.8, 6.4, 6.2, 6.7, 7.0, 6.8, 6.5, 6.3, 6.6, 6.9, 6.7, 6.3, 6.6, 6.9, 7.1, 6.8, 6.6, 6.4, 6.7, 7.0, 6.7, 6.4, 6.2, 6.5, 6.8, 6.6, 6.4, 6.7, 6.5, 6.3],
+                8: [6.3, 6.5, 6.1, 5.9, 6.4, 6.7, 6.5, 6.2, 6.0, 6.3, 6.6, 6.4, 6.0, 6.3, 6.6, 6.8, 6.5, 6.3, 6.1, 6.4, 6.7, 6.4, 6.1, 5.9, 6.2, 6.5, 6.3, 6.1, 6.4, 6.2, 6.0],
+                9: [5.9, 6.1, 5.7, 5.5, 6.0, 6.3, 6.1, 5.8, 5.6, 5.9, 6.2, 6.0, 5.6, 5.9, 6.2, 6.4, 6.1, 5.9, 5.7, 6.0, 6.3, 6.0, 5.7, 5.5, 5.8, 6.1, 5.9, 5.7, 6.0, 5.8],
+                10: [5.3, 5.5, 5.1, 4.9, 5.4, 5.7, 5.5, 5.2, 5.0, 5.3, 5.6, 5.4, 5.0, 5.3, 5.6, 5.8, 5.5, 5.3, 5.1, 5.4, 5.7, 5.4, 5.1, 4.9, 5.2, 5.5, 5.3, 5.1, 5.4, 5.2, 5.0],
+                11: [4.8, 5.0, 4.6, 4.4, 4.9, 5.2, 5.0, 4.7, 4.5, 4.8, 5.1, 4.9, 4.5, 4.8, 5.1, 5.3, 5.0, 4.8, 4.6, 4.9, 5.2, 4.9, 4.6, 4.4, 4.7, 5.0, 4.8, 4.6, 4.9, 4.7],
+                12: [4.4, 4.6, 4.2, 4.0, 4.5, 4.8, 4.6, 4.3, 4.1, 4.4, 4.7, 4.5, 4.1, 4.4, 4.7, 4.9, 4.6, 4.4, 4.2, 4.5, 4.8, 4.5, 4.2, 4.0, 4.3, 4.6, 4.4, 4.2, 4.5, 4.3, 4.1]
+            },
+            merida: {
+                1: [4.8, 4.9, 5.1, 4.7, 4.6, 5.0, 5.2, 4.9, 4.8, 5.1, 5.3, 5.0, 4.7, 4.9, 5.2, 5.4, 5.1, 4.9, 4.8, 5.0, 5.3, 5.1, 4.8, 4.6, 4.9, 5.2, 5.0, 4.8, 5.1, 4.9, 4.7],
+                2: [5.4, 5.6, 5.3, 5.1, 5.5, 5.8, 5.6, 5.4, 5.2, 5.5, 5.7, 5.5, 5.2, 5.4, 5.7, 5.9, 5.6, 5.4, 5.3, 5.5, 5.8, 5.6, 5.3, 5.1, 5.4, 5.7, 5.5, 5.3],
+                3: [6.1, 6.3, 5.9, 5.7, 6.2, 6.5, 6.3, 6.0, 5.8, 6.1, 6.4, 6.2, 5.8, 6.1, 6.4, 6.6, 6.3, 6.1, 5.9, 6.2, 6.5, 6.2, 5.9, 5.7, 6.0, 6.3, 6.1, 5.9, 6.2, 6.0, 5.8],
+                4: [6.7, 6.9, 6.5, 6.3, 6.8, 7.1, 6.9, 6.6, 6.4, 6.7, 7.0, 6.8, 6.4, 6.7, 7.0, 7.2, 6.9, 6.7, 6.5, 6.8, 7.1, 6.8, 6.5, 6.3, 6.6, 6.9, 6.7, 6.5, 6.8, 6.6],
+                5: [7.1, 7.3, 6.9, 6.7, 7.2, 7.5, 7.3, 7.0, 6.8, 7.1, 7.4, 7.2, 6.8, 7.1, 7.4, 7.6, 7.3, 7.1, 6.9, 7.2, 7.5, 7.2, 6.9, 6.7, 7.0, 7.3, 7.1, 6.9, 7.2, 7.0, 6.8],
+                6: [7.4, 7.6, 7.2, 7.0, 7.5, 7.8, 7.6, 7.3, 7.1, 7.4, 7.7, 7.5, 7.1, 7.4, 7.7, 7.9, 7.6, 7.4, 7.2, 7.5, 7.8, 7.5, 7.2, 7.0, 7.3, 7.6, 7.4, 7.2, 7.5, 7.3],
+                7: [7.1, 7.3, 6.9, 6.7, 7.2, 7.5, 7.3, 7.0, 6.8, 7.1, 7.4, 7.2, 6.8, 7.1, 7.4, 7.6, 7.3, 7.1, 6.9, 7.2, 7.5, 7.2, 6.9, 6.7, 7.0, 7.3, 7.1, 6.9, 7.2, 7.0, 6.8],
+                8: [6.8, 7.0, 6.6, 6.4, 6.9, 7.2, 7.0, 6.7, 6.5, 6.8, 7.1, 6.9, 6.5, 6.8, 7.1, 7.3, 7.0, 6.8, 6.6, 6.9, 7.2, 6.9, 6.6, 6.4, 6.7, 7.0, 6.8, 6.6, 6.9, 6.7, 6.5],
+                9: [6.4, 6.6, 6.2, 6.0, 6.5, 6.8, 6.6, 6.3, 6.1, 6.4, 6.7, 6.5, 6.1, 6.4, 6.7, 6.9, 6.6, 6.4, 6.2, 6.5, 6.8, 6.5, 6.2, 6.0, 6.3, 6.6, 6.4, 6.2, 6.5, 6.3],
+                10: [5.8, 6.0, 5.6, 5.4, 5.9, 6.2, 6.0, 5.7, 5.5, 5.8, 6.1, 5.9, 5.5, 5.8, 6.1, 6.3, 6.0, 5.8, 5.6, 5.9, 6.2, 5.9, 5.6, 5.4, 5.7, 6.0, 5.8, 5.6, 5.9, 5.7, 5.5],
+                11: [5.3, 5.5, 5.1, 4.9, 5.4, 5.7, 5.5, 5.2, 5.0, 5.3, 5.6, 5.4, 5.0, 5.3, 5.6, 5.8, 5.5, 5.3, 5.1, 5.4, 5.7, 5.4, 5.1, 4.9, 5.2, 5.5, 5.3, 5.1, 5.4, 5.2],
+                12: [4.9, 5.1, 4.7, 4.5, 5.0, 5.3, 5.1, 4.8, 4.6, 4.9, 5.2, 5.0, 4.6, 4.9, 5.2, 5.4, 5.1, 4.9, 4.7, 5.0, 5.3, 5.0, 4.7, 4.5, 4.8, 5.1, 4.9, 4.7, 5.0, 4.8, 4.6]
+            },
+            tijuana: {
+                1: [5.0, 5.1, 5.3, 4.9, 4.8, 5.2, 5.4, 5.1, 5.0, 5.3, 5.5, 5.2, 4.9, 5.1, 5.4, 5.6, 5.3, 5.1, 5.0, 5.2, 5.5, 5.3, 5.0, 4.8, 5.1, 5.4, 5.2, 5.0, 5.3, 5.1, 4.9],
+                2: [5.6, 5.8, 5.5, 5.3, 5.7, 6.0, 5.8, 5.6, 5.4, 5.7, 5.9, 5.7, 5.4, 5.6, 5.9, 6.1, 5.8, 5.6, 5.5, 5.7, 6.0, 5.8, 5.5, 5.3, 5.6, 5.9, 5.7, 5.5],
+                3: [6.3, 6.5, 6.1, 5.9, 6.4, 6.7, 6.5, 6.2, 6.0, 6.3, 6.6, 6.4, 6.0, 6.3, 6.6, 6.8, 6.5, 6.3, 6.1, 6.4, 6.7, 6.4, 6.1, 5.9, 6.2, 6.5, 6.3, 6.1, 6.4, 6.2, 6.0],
+                4: [6.9, 7.1, 6.7, 6.5, 7.0, 7.3, 7.1, 6.8, 6.6, 6.9, 7.2, 7.0, 6.6, 6.9, 7.2, 7.4, 7.1, 6.9, 6.7, 7.0, 7.3, 7.0, 6.7, 6.5, 6.8, 7.1, 6.9, 6.7, 7.0, 6.8],
+                5: [7.3, 7.5, 7.1, 6.9, 7.4, 7.7, 7.5, 7.2, 7.0, 7.3, 7.6, 7.4, 7.0, 7.3, 7.6, 7.8, 7.5, 7.3, 7.1, 7.4, 7.7, 7.4, 7.1, 6.9, 7.2, 7.5, 7.3, 7.1, 7.4, 7.2, 7.0],
+                6: [7.6, 7.8, 7.4, 7.2, 7.7, 8.0, 7.8, 7.5, 7.3, 7.6, 7.9, 7.7, 7.3, 7.6, 7.9, 8.1, 7.8, 7.6, 7.4, 7.7, 8.0, 7.7, 7.4, 7.2, 7.5, 7.8, 7.6, 7.4, 7.7, 7.5],
+                7: [7.3, 7.5, 7.1, 6.9, 7.4, 7.7, 7.5, 7.2, 7.0, 7.3, 7.6, 7.4, 7.0, 7.3, 7.6, 7.8, 7.5, 7.3, 7.1, 7.4, 7.7, 7.4, 7.1, 6.9, 7.2, 7.5, 7.3, 7.1, 7.4, 7.2, 7.0],
+                8: [7.0, 7.2, 6.8, 6.6, 7.1, 7.4, 7.2, 6.9, 6.7, 7.0, 7.3, 7.1, 6.7, 7.0, 7.3, 7.5, 7.2, 7.0, 6.8, 7.1, 7.4, 7.1, 6.8, 6.6, 6.9, 7.2, 7.0, 6.8, 7.1, 6.9, 6.7],
+                9: [6.6, 6.8, 6.4, 6.2, 6.7, 7.0, 6.8, 6.5, 6.3, 6.6, 6.9, 6.7, 6.3, 6.6, 6.9, 7.1, 6.8, 6.6, 6.4, 6.7, 7.0, 6.7, 6.4, 6.2, 6.5, 6.8, 6.6, 6.4, 6.7, 6.5],
+                10: [6.0, 6.2, 5.8, 5.6, 6.1, 6.4, 6.2, 5.9, 5.7, 6.0, 6.3, 6.1, 5.7, 6.0, 6.3, 6.5, 6.2, 6.0, 5.8, 6.1, 6.4, 6.1, 5.8, 5.6, 5.9, 6.2, 6.0, 5.8, 6.1, 5.9, 5.7],
+                11: [5.5, 5.7, 5.3, 5.1, 5.6, 5.9, 5.7, 5.4, 5.2, 5.5, 5.8, 5.6, 5.2, 5.5, 5.8, 6.0, 5.7, 5.5, 5.3, 5.6, 5.9, 5.6, 5.3, 5.1, 5.4, 5.7, 5.5, 5.3, 5.6, 5.4],
+                12: [5.1, 5.3, 4.9, 4.7, 5.2, 5.5, 5.3, 5.0, 4.8, 5.1, 5.4, 5.2, 4.8, 5.1, 5.4, 5.6, 5.3, 5.1, 4.9, 5.2, 5.5, 5.2, 4.9, 4.7, 5.0, 5.3, 5.1, 4.9, 5.2, 5.0, 4.8]
+            }
+        };
+        
+        // Variables para los gráficos
+        let solarRadiationChart, consumptionChart, costChart;
+        let consumptionData = [];
+        let generationData = [];
+        let batteryCapacity = 0;
+        
+        // Inicialización de la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar los listeners para los range inputs
+            document.getElementById('variability').addEventListener('input', function() {
+                document.getElementById('variability-value').textContent = this.value + '%';
+            });
+            
+            document.getElementById('panelEfficiency').addEventListener('input', function() {
+                document.getElementById('efficiency-value').textContent = this.value + '%';
+            });
+            
+            document.getElementById('confidence').addEventListener('input', function() {
+                document.getElementById('confidence-value').textContent = this.value + '%';
+            });
+            
+            document.getElementById('batteryEfficiency').addEventListener('input', function() {
+                document.getElementById('battery-efficiency-value').textContent = this.value + '%';
+            });
+            
+            document.getElementById('batteryMinLevel').addEventListener('input', function() {
+                document.getElementById('battery-min-value').textContent = this.value + '%';
+            });
+            
+            // Configurar los tabs
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remover clase active de todos los botones y contenidos
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Agregar clase active al botón y contenido seleccionado
+                    this.classList.add('active');
+                    document.getElementById(this.dataset.tab).classList.add('active');
+                });
+            });
+            
+            // Configurar el botón de calcular
+            document.getElementById('calculate-btn').addEventListener('click', calculate);
+            
+            // Calcular con valores por defecto
+            calculate();
+        });
+        
+        function calculate() {
+            // Obtener valores de los inputs
+            const city = document.getElementById('city').value;
+            const month = parseInt(document.getElementById('month').value);
+            const dailyConsumption = parseFloat(document.getElementById('consumption').value);
+            const variability = parseFloat(document.getElementById('variability').value) / 100;
+            const panelPower = parseFloat(document.getElementById('panelPower').value);
+            const panelEfficiency = parseFloat(document.getElementById('panelEfficiency').value) / 100;
+            const panelCount = parseInt(document.getElementById('panelCount').value);
+            const confidence = parseInt(document.getElementById('confidence').value);
+            batteryCapacity = parseFloat(document.getElementById('batteryCapacity').value);
+            const batteryEfficiency = parseFloat(document.getElementById('batteryEfficiency').value) / 100;
+            const batteryMinLevel = parseFloat(document.getElementById('batteryMinLevel').value) / 100;
+            
+            // Obtener datos de radiación solar para la ciudad y mes seleccionados
+            const radiationData = solarData[city][month];
+            const daysInMonth = radiationData.length;
+            const days = [];
+            for (let i = 1; i <= daysInMonth; i++) days.push(`Día ${i}`);
+            
+            // Simular consumo diario con variabilidad
+            consumptionData = [];
+            for (let i = 0; i < daysInMonth; i++) {
+                const variation = 1 + (Math.random() * 2 - 1) * variability;
+                consumptionData.push(dailyConsumption * variation);
+            }
+            
+            // Calcular generación de energía sin batería
+            generationData = [];
+            for (let i = 0; i < daysInMonth; i++) {
+                // Energía = radiación × potencia del panel × eficiencia × número de paneles
+                generationData.push(radiationData[i] * panelPower * panelEfficiency * panelCount);
+            }
+            
+            // Calcular con sistema de batería si está configurado
+            let batterySimulation = null;
+            if (batteryCapacity > 0) {
+                batterySimulation = {
+                    batteryLevel: batteryCapacity * 0.5, // Iniciar con 50% de carga
+                    minLevel: batteryCapacity * batteryMinLevel,
+                    dailyLevels: [],
+                    savedEnergy: 0,
+                    lostEnergy: 0,
+                    gridEnergy: 0
+                };
+                
+                const generationWithBattery = [];
+                
+                for (let i = 0; i < daysInMonth; i++) {
+                    const generation = radiationData[i] * panelPower * panelEfficiency * panelCount;
+                    const consumption = consumptionData[i];
+                    const difference = generation - consumption;
+                    
+                    if (difference > 0) {
+                        // Excedente: cargar batería
+                        const availableSpace = batteryCapacity - batterySimulation.batteryLevel;
+                        const chargeAmount = Math.min(difference * batteryEfficiency, availableSpace);
+                        batterySimulation.batteryLevel += chargeAmount;
+                        batterySimulation.savedEnergy += chargeAmount;
+                        
+                        // Lo que no cabe en la batería se pierde (podría venderse a la red en un escenario real)
+                        batterySimulation.lostEnergy += difference - chargeAmount;
+                        generationWithBattery.push(consumption + chargeAmount / batteryEfficiency);
+                    } else {
+                        // Déficit: usar batería
+                        const neededEnergy = -difference;
+                        const dischargeAmount = Math.min(neededEnergy, batterySimulation.batteryLevel - batterySimulation.minLevel);
+                        batterySimulation.batteryLevel -= dischargeAmount;
+                        generationWithBattery.push(generation + dischargeAmount);
+                        
+                        // Si la batería no puede cubrir todo, tomar de la red
+                        if (neededEnergy > dischargeAmount) {
+                            batterySimulation.gridEnergy += neededEnergy - dischargeAmount;
+                        }
+                    }
+                    
+                    batterySimulation.dailyLevels.push(batterySimulation.batteryLevel);
+                }
+                
+                // Actualizar datos de generación para incluir el efecto de la batería
+                for (let i = 0; i < daysInMonth; i++) {
+                    generationData[i] = generationWithBattery[i];
+                }
+            }
+            
+            // Calcular diferencia entre generación y consumo
+            const differenceData = [];
+            for (let i = 0; i < daysInMonth; i++) {
+                differenceData.push(generationData[i] - consumptionData[i]);
+            }
+            
+            // Análisis probabilístico
+            let positiveDays = 0;
+            for (let i = 0; i < differenceData.length; i++) {
+                if (differenceData[i] >= 0) positiveDays++;
+            }
+            const coverageProbability = (positiveDays / daysInMonth) * 100;
+            
+            // Determinar número mínimo de paneles para alcanzar el nivel de confianza deseado
+            let requiredPanels = panelCount;
+            let currentProbability = coverageProbability;
+            
+            while (currentProbability < confidence && requiredPanels < 50) {
+                requiredPanels++;
+                let tempPositiveDays = 0;
+                
+                for (let i = 0; i < daysInMonth; i++) {
+                    let tempGeneration = radiationData[i] * panelPower * panelEfficiency * requiredPanels;
+                    
+                    // Considerar batería si está activa
+                    if (batteryCapacity > 0) {
+                        // Simulación simplificada para el cálculo de paneles necesarios
+                        const tempDiff = tempGeneration - consumptionData[i];
+                        if (tempDiff >= 0 || 
+                            (tempDiff < 0 && Math.abs(tempDiff) <= (batteryCapacity * (1 - batteryMinLevel)))) {
+                            tempPositiveDays++;
+                        }
+                    } else {
+                        if (tempGeneration >= consumptionData[i]) tempPositiveDays++;
+                    }
+                }
+                
+                currentProbability = (tempPositiveDays / daysInMonth) * 100;
+            }
+            
+            // Actualizar gráficos
+            updateCharts(
+                radiationData, 
+                consumptionData, 
+                generationData, 
+                differenceData, 
+                coverageProbability, 
+                requiredPanels,
+                batterySimulation,
+                city
+            );
+            
+            // Mostrar resultados
+            showResults(
+                city, 
+                month, 
+                dailyConsumption, 
+                variability, 
+                panelPower, 
+                panelEfficiency, 
+                panelCount, 
+                coverageProbability, 
+                requiredPanels, 
+                differenceData,
+                batterySimulation
+            );
+        }
+        
+        function updateCharts(radiationData, consumptionData, generationData, differenceData, coverageProbability, requiredPanels, batterySimulation, city) {
+            const days = [];
+            for (let i = 1; i <= radiationData.length; i++) days.push(`Día ${i}`);
+            
+            // Gráfico de radiación solar
+            if (solarRadiationChart) solarRadiationChart.destroy();
+            const solarCtx = document.getElementById('solarRadiationChart').getContext('2d');
+            solarRadiationChart = new Chart(solarCtx, {
+                type: 'line',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: 'Radiación solar (kWh/m²/día)',
+                        data: radiationData,
+                        borderColor: 'rgba(255, 154, 60, 1)',
+                        backgroundColor: 'rgba(255, 154, 60, 0.2)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'kWh/m²/día'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Días del mes'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.dataset.label}: ${context.parsed.y.toFixed(2)} kWh/m²/día`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Gráfico de consumo vs generación
+            if (consumptionChart) consumptionChart.destroy();
+            const consumptionCtx = document.getElementById('consumptionChart').getContext('2d');
+            consumptionChart = new Chart(consumptionCtx, {
+                type: 'bar',
+                data: {
+                    labels: days,
+                    datasets: [
+                        {
+                            label: 'Consumo (kWh)',
+                            data: consumptionData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Generación (kWh)',
+                            data: generationData,
+                            backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'kWh'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Días del mes'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.dataset.label}: ${context.parsed.y.toFixed(2)} kWh`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Gráfico de optimización de costos
+            if (costChart) costChart.destroy();
+            const costCtx = document.getElementById('costChart').getContext('2d');
+            
+            // Parámetros económicos
+            const panelCost = 8000; // Costo por panel en MXN
+            const batteryCost = 10000; // Costo por kWh de batería en MXN
+            const installationCost = 5000; // Costo fijo de instalación
+            const electricityPrice = 2.5; // Precio de la electricidad en MXN por kWh
+            const inflationRate = 0.05; // Tasa de inflación anual
+            const years = 10; // Período de análisis
+            
+            // Calcular costos y ahorros para diferentes configuraciones
+            const panelCounts = [];
+            const totalCosts = [];
+            const annualSavings = [];
+            const paybackPeriods = [];
+            const roi = [];
+            
+            for (let i = 1; i <= 15; i++) {
+                panelCounts.push(i);
+                
+                // Calcular generación anual estimada
+                let annualGeneration = 0;
+                for (let month = 1; month <= 12; month++) {
+                    if (solarData[city] && solarData[city][month]) {
+                        const monthlyRadiation = solarData[city][month].reduce((a, b) => a + b, 0) / solarData[city][month].length;
+                        annualGeneration += monthlyRadiation * parseFloat(document.getElementById('panelPower').value) * 
+                                           (parseFloat(document.getElementById('panelEfficiency').value) / 100) * i * 30; // Aproximación mensual
+                    }
+                }
+                
+                // Calcular costos
+                const systemCost = (i * panelCost) + (batteryCapacity * batteryCost) + installationCost;
+                totalCosts.push(systemCost);
+                
+                // Calcular ahorros anuales
+                const firstYearSavings = annualGeneration * electricityPrice;
+                annualSavings.push(firstYearSavings);
+                
+                // Calcular período de recuperación
+                let cumulativeSavings = 0;
+                let payback = years + 1;
+                for (let y = 1; y <= years; y++) {
+                    cumulativeSavings += firstYearSavings * Math.pow(1 + inflationRate, y - 1);
+                    if (cumulativeSavings >= systemCost && payback === years + 1) {
+                        payback = y;
+                    }
+                }
+                paybackPeriods.push(payback <= years ? payback : null);
+                
+                // Calcular ROI
+                let totalSavings = 0;
+                for (let y = 1; y <= years; y++) {
+                    totalSavings += firstYearSavings * Math.pow(1 + inflationRate, y - 1);
+                }
+                roi.push(((totalSavings - systemCost) / systemCost * 100).toFixed(1));
+            }
+            
+            costChart = new Chart(costCtx, {
+                type: 'bar',
+                data: {
+                    labels: panelCounts,
+                    datasets: [
+                        {
+                            label: 'Costo del sistema (MXN)',
+                            data: totalCosts,
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Ahorro anual (MXN)',
+                            data: annualSavings,
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            yAxisID: 'y1',
+                            type: 'line'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Costo del sistema (MXN)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Ahorro anual (MXN)'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Número de paneles'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.datasetIndex === 0) {
+                                        label += `$${context.parsed.y.toLocaleString('es-MX')}`;
+                                        label += ` | ROI: ${roi[context.dataIndex]}%`;
+                                    } else {
+                                        label += `$${context.parsed.y.toLocaleString('es-MX')}`;
+                                    }
+                                    
+                                    if (paybackPeriods[context.dataIndex]) {
+                                        label += ` | Recuperación: ${paybackPeriods[context.dataIndex]} años`;
+                                    } else {
+                                        label += ` | Recuperación: >${years} años`;
+                                    }
+                                    
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Actualizar texto de optimización de costos
+            const currentPanels = parseInt(document.getElementById('panelCount').value);
+            const currentSystemCost = totalCosts[currentPanels - 1] || 0;
+            const currentAnnualSavings = annualSavings[currentPanels - 1] || 0;
+            const currentROI = roi[currentPanels - 1] || 0;
+            const currentPayback = paybackPeriods[currentPanels - 1] || `más de ${years}`;
+            
+            let costText = `
+                <p>Con <strong>${currentPanels} paneles</strong>, el costo estimado del sistema es de <strong>$${currentSystemCost.toLocaleString('es-MX')}</strong> MXN.</p>
+                <p>El ahorro anual estimado es de <strong>$${currentAnnualSavings.toLocaleString('es-MX')}</strong> MXN, con un retorno de inversión (ROI) de <strong>${currentROI}%</strong> en ${years} años.</p>
+                <p>El período de recuperación de la inversión es de aproximadamente <strong>${currentPayback} años</strong>.</p>
+            `;
+            
+            if (batteryCapacity > 0) {
+                const batteryCostTotal = batteryCapacity * batteryCost;
+                costText += `
+                    <p>El sistema incluye una batería de <strong>${batteryCapacity} kWh</strong> con un costo adicional de <strong>$${batteryCostTotal.toLocaleString('es-MX')}</strong> MXN.</p>
+                `;
+            }
+            
+            document.getElementById('costText').innerHTML = costText;
+        }
+        
+        function showResults(city, month, dailyConsumption, variability, panelPower, panelEfficiency, panelCount, coverageProbability, requiredPanels, differenceData, batterySimulation) {
+            const cityName = document.getElementById('city').options[document.getElementById('city').selectedIndex].text;
+            const monthName = document.getElementById('month').options[document.getElementById('month').selectedIndex].text;
+            
+            document.getElementById('result-location').textContent = `${cityName}, ${monthName}`;
+            
+            // Calcular métricas importantes
+            const totalConsumption = consumptionData.reduce((a, b) => a + b, 0);
+            const totalGeneration = generationData.reduce((a, b) => a + b, 0);
+            const averageDailyGeneration = totalGeneration / consumptionData.length;
+            const maxDeficit = Math.min(...differenceData);
+            const maxSurplus = Math.max(...differenceData);
+            const deficitDay = differenceData.indexOf(maxDeficit) + 1;
+            const surplusDay = differenceData.indexOf(maxSurplus) + 1;
+            const autonomyPercentage = (totalGeneration / totalConsumption) * 100;
+            
+            // Crear HTML para los resultados
+            let resultsHTML = `
+                <div class="result-card">
+                    <h4><i class="fas fa-plug"></i> Consumo Total</h4>
+                    <div class="result-value">${totalConsumption.toFixed(1)} kWh</div>
+                    <p>${dailyConsumption.toFixed(1)} kWh/día en promedio</p>
+                </div>
+                
+                <div class="result-card">
+                    <h4><i class="fas fa-solar-panel"></i> Generación Total</h4>
+                    <div class="result-value ${autonomyPercentage >= 100 ? 'result-positive' : 'result-negative'}">${totalGeneration.toFixed(1)} kWh</div>
+                    <p>${averageDailyGeneration.toFixed(1)} kWh/día en promedio</p>
+                </div>
+                
+                <div class="result-card">
+                    <h4><i class="fas fa-battery-full"></i> Autonomía</h4>
+                    <div class="result-value ${autonomyPercentage >= 100 ? 'result-positive' : 'result-negative'}">${autonomyPercentage.toFixed(1)}%</div>
+                    <p>${coverageProbability.toFixed(1)}% de días cubiertos</p>
+                </div>
+                
+                <div class="result-card">
+                    <h4><i class="fas fa-arrow-down"></i> Mayor Déficit</h4>
+                    <div class="result-value result-negative">${maxDeficit.toFixed(1)} kWh</div>
+                    <p>Día ${deficitDay}</p>
+                </div>
+                
+                <div class="result-card">
+                    <h4><i class="fas fa-arrow-up"></i> Mayor Excedente</h4>
+                    <div class="result-value result-positive">${maxSurplus.toFixed(1)} kWh</div>
+                    <p>Día ${surplusDay}</p>
+                </div>
+                
+                <div class="result-card">
+                    <h4><i class="fas fa-calculator"></i> Paneles Recomendados</h4>
+                    <div class="result-value result-neutral">${requiredPanels}</div>
+                    <p>Para ${document.getElementById('confidence').value}% de confianza</p>
+                </div>
+            `;
+            
+            // Añadir información de la batería si está configurada
+            if (batterySimulation) {
+                const batteryUsage = ((batterySimulation.savedEnergy + batterySimulation.gridEnergy) / totalConsumption) * 100;
+                const batteryCoverage = (batterySimulation.savedEnergy / (batterySimulation.savedEnergy + batterySimulation.gridEnergy)) * 100;
+                
+                resultsHTML += `
+                    <div class="result-card">
+                        <h4><i class="fas fa-battery-three-quarters"></i> Uso de Batería</h4>
+                        <div class="result-value result-positive">${batteryUsage.toFixed(1)}%</div>
+                        <p>${batteryCoverage.toFixed(1)}% del déficit cubierto</p>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h4><i class="fas fa-bolt"></i> Energía de Red</h4>
+                        <div class="result-value result-negative">${batterySimulation.gridEnergy.toFixed(1)} kWh</div>
+                        <p>${(batterySimulation.gridEnergy / totalConsumption * 100).toFixed(1)}% del consumo</p>
+                    </div>
+                `;
+            }
+            
+            // Actualizar el panel de resultados
+            document.getElementById('results-grid').innerHTML = resultsHTML;
+            document.getElementById('results-panel').style.display = 'block';
+            
+            // Scroll suave a los resultados
+            document.getElementById('results-panel').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
